@@ -54,8 +54,6 @@ const SignUp = () => {
     }
 
     try {
-      
-
       const userDetail = await createUserWithEmailAndPassword(
         auth,
         email,
@@ -66,7 +64,7 @@ const SignUp = () => {
 
       console.log("User created successfully:", user);
 
-      await set(ref(db, 'user/' + user.uid), {
+      await set(ref(db, 'users/' + user.uid), {
         uid: user.uid,
         email: user.email,
         username: userName

@@ -1,13 +1,15 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { GoHomeFill } from "react-icons/go";
 import { MdClose } from "react-icons/md";
 import { FaGoogle, FaGithub } from "react-icons/fa";
-import { auth } from "../../firebase/firebase";
+import { auth,db } from "../../firebase/firebase";
+import { set,ref } from "firebase/database";
 import {
   signInWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithPopup,
   GithubAuthProvider,
+  onAuthStateChanged,
 } from "firebase/auth";
 import { useNavigate, Link } from "react-router-dom";
 
@@ -17,6 +19,14 @@ const SignIn = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState();
   const [displayError, setDisplayError] = useState(false);
+
+  useEffect(() => {
+    onAuthStateChanged(auth,async (user) => {
+      if(user){
+        navigate("/dashboard");
+      }
+    })
+  },[]);
 
   const handleEmailChange = (event) => {
     setEmail(event.target.value);
@@ -57,9 +67,14 @@ const SignIn = () => {
   const handleGoogleSignIn = async () => {
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
 
-      // const userName = result.user.displayName;
+      const user = result?.user;
+      await set(ref(db, 'users/' + user.uid), {
+        uid: user.uid,
+        email: user.email,
+        username: user?.displayName
+      });
 
       navigate("/dashboard");
     } catch (error) {
