@@ -150,25 +150,25 @@ const Dashboard = () => {
 
   return (
     <div className="w-screen h-screen bg-gray-200 bg-gradient-to-t flex items-center justify-center">
-      <div className="w-10/12 h-9/10 grid grid-rows-8 grid-cols-3 gap-6">
+      <div className="w-9/10 h-full md:w-10/12 md:h-9/10 grid grid-cols-1 md:grid-rows-8 md:grid-cols-3 gap-2 md:gap-6">
         <div
           name="sideBar"
-          className="bg-white row-span-8 rounded-lg overflow-auto"
+          className="bg-white md:row-span-8 rounded-lg overflow-x-scroll md:overflow-auto"
         >
-          <div className="p-4 ml-auto mr-auto mt-8 w-8/10 flex flex-col">
+          <div className="hidden p-4 ml-auto mr-auto mt-8 w-8/10 md:flex flex-row">
             <div className="flex flex-row space-x-2">
               <GiAtomicSlashes className="text-3xl text-gray-700" />
               <p className="text-xl font-semibold text-gray-700">Ease Abode</p>
             </div>
           </div>
-          <div className="p-4 ml-auto mr-auto mt-8 w-8/10 flex flex-col space-y-6">
+          <div className="p-2 md:p-4 ml-auto mr-auto mt-4 md:mt-8 w-8/10 flex flex-row space-x-4 md:space-x-0 items-center justify-center md:flex-col md:space-y-6 md:justify-start md:items-start">
             <div className="p-1 flex flex-row items-center space-x-4 text-gray-700 hover:text-gray-700 hover:bg-gray-200 rounded-md hover:cursor-pointer">
-              <GoHome className="text-2xl font-bold " />
-              <p className="text-md font-medium ">Home</p>
+              <GoHome className="text-2xl font-bold" />
+              <p className="text-md font-medium hidden md:block">Home</p>
             </div>
             <div className="p-1 relative flex flex-row items-center space-x-4 text-gray-400 hover:text-gray-700 rounded-md hover:bg-gray-200 hover:cursor-pointer">
               <CiMoneyBill className="text-2xl font-bold " />
-              <p className="text-md font-medium">Expenses</p>
+              <p className="text-md font-medium hidden md:block">Expenses</p>
               {/* <FaCirclePlus className="text-sm absolute right-10 inset-y-1"/> */}
             </div>
             <div
@@ -176,12 +176,12 @@ const Dashboard = () => {
               className="p-1 relative flex flex-row items-center space-x-4 text-gray-400 hover:text-gray-700  hover:bg-gray-200 rounded-md hover:cursor-pointer"
             >
               <GoTasklist className="text-2xl font-bold " />
-              <p className="text-md font-medium">Tasks</p>
+              <p className="text-md font-medium hidden md:block">Tasks</p>
               {/* <FaCirclePlus className="text-sm absolute right-10 inset-y-1"/> */}
             </div>
             <div className="p-1 relative flex flex-row items-center space-x-4 text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded-md hover:cursor-pointer">
               <MdOutlineLocalGroceryStore className="text-2xl font-bold " />
-              <p className="text-md font-medium">Groceries</p>
+              <p className="text-md font-medium hidden md:block">Groceries</p>
               {/* <FaCirclePlus className="text-sm absolute right-10 inset-y-1"/> */}
             </div>
             <div
@@ -189,17 +189,24 @@ const Dashboard = () => {
               className="p-1 relative flex flex-row items-center space-x-4 text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded-md hover:cursor-pointer"
             >
               <AiOutlineTeam className="text-2xl font-bold " />
-              <p className="text-md font-medium">Roomates</p>
+              <p className="text-md font-medium hidden md:block">Roomates</p>
             </div>
             <div className="p-1 relative flex flex-row items-center space-x-4 text-gray-400 hover:bg-gray-200 rounded-md hover:text-gray-700 hover:cursor-pointer">
               <CiSettings className="text-2xl font-bold " />
-              <p className="text-md font-medium">Settings</p>
+              <p className="text-md font-medium hidden md:block">Settings</p>
+            </div>
+            <div
+              onClick={handleSignOut}
+              className="md:hidden p-1 relative flex flex-row items-center space-x-4 text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded-md hover:cursor-pointer"
+            >
+              <CiPower className="text-2xl font-bold " />
+              <p className="text-md font-medium hidden md:block">Log Out</p>
             </div>
           </div>
-          <div className="p-4 ml-auto mr-auto mt-16 w-8/10 flex flex-col space-y-6">
+          <div className="md:p-4 ml-auto mr-auto mt-16 w-8/10 hidden md:flex flex-row md:flex-col space-y-6">
             <div className="p-1 relative flex flex-row items-center space-x-4 text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded-md hover:cursor-pointer">
               <CiCircleInfo className="text-2xl font-bold " />
-              <p className="text-md font-medium">Help & Information</p>
+              <p className="text-md font-medium hidden md:block">Help & Information</p>
             </div>
             <div
               onClick={handleSignOut}
@@ -212,7 +219,7 @@ const Dashboard = () => {
         </div>
         <div
           name="TopBar"
-          className="bg-white w-full row-span-1 col-span-2 rounded-lg"
+          className="hidden md:block bg-white w-full md:row-span-1 md:col-span-2 rounded-lg"
         >
           <div className="w-full h-full rounded-lg flex flex-row space-x-2 items-center justify-around overflow-x-clip">
             <div className="flex flex-row w-9/10 h-full">
@@ -255,7 +262,7 @@ const Dashboard = () => {
         </div>
         <div
           name="Tasks"
-          className="bg-white row-span-7 col-span-1 rounded-lg overflow-clip"
+          className="bg-white md:row-span-7 md:col-span-1 rounded-lg overflow-clip md:overflow-auto"
         >
           <div className="p-4 w-9/10 ml-auto mr-auto flex flex-col space-y-4 h-full">
             <p className="text-xl font-semibold text-gray-700">
@@ -265,7 +272,7 @@ const Dashboard = () => {
               {tasks.map((task, index) => (
                 <div
                   key={index}
-                  className="w-full h-2/10 flex flex-row space-x-2 items-center"
+                  className="w-full md:h-2/10 flex flex-row space-x-2 items-center"
                 >
                   <div
                     onClick={() => handleCompleteTask(task, index)}

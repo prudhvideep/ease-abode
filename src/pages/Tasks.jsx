@@ -529,8 +529,8 @@ const Tasks = () => {
                       onClick={() => setShowDatePicker(true)}
                       className="flex flex-row items-center justify-center p-2  h-6 text-semibold text-xs border border-gray-300 hover:bg-gray-50 rounded-md text-gray-500 overflow-clip"
                     >
-                      <CiCalendar className="mr-1 text-lg" />
-                      Due Date
+                      <CiCalendar className="md:mr-1 text-lg" />
+                      <span className="hidden md:block">Due Date</span>
                     </button>
                   )}
                   {priority && (
@@ -554,8 +554,8 @@ const Tasks = () => {
                       onClick={() => setShowPriority(true)}
                       className="flex flex-row items-center justify-center p-2  h-6 text-semibold text-xs border border-gray-300 hover:bg-gray-50 rounded-md text-gray-500"
                     >
-                      <CiFlag1 className="mr-1 text-lg" />
-                      Priority
+                      <CiFlag1 className="md:mr-1 text-lg" />
+                      <span className="hidden md:block">Priority</span>
                     </button>
                   )}
                   {selectedUsers.length > 0 &&
@@ -571,8 +571,8 @@ const Tasks = () => {
                     onClick={() => setShowUsers(true)}
                     className="flex flex-row items-center justify-center p-2  h-6 text-semibold text-xs border border-gray-300 hover:bg-gray-50 rounded-md text-gray-500"
                   >
-                    <CiUser className="mr-1 text-lg" />
-                    Asignee
+                    <CiUser className="md:mr-1 text-lg" />
+                    <span className="hidden md:block">Asignee</span>
                   </button>
                   {showUsers && (
                     <div ref={userPickerRef} className="absolute left-0 top-0">
