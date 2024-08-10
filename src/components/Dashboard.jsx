@@ -153,7 +153,7 @@ const Dashboard = () => {
       <div className="w-9/10 h-full md:w-10/12 md:h-9/10 grid grid-cols-1 md:grid-rows-8 md:grid-cols-3 gap-2 md:gap-6">
         <div
           name="sideBar"
-          className="bg-white md:row-span-8 rounded-lg overflow-x-scroll md:overflow-auto"
+          className="bg-white md:row-span-8 min-h-12 rounded-lg overflow-auto"
         >
           <div className="hidden p-4 ml-auto mr-auto mt-8 w-8/10 md:flex flex-row">
             <div className="flex flex-row space-x-2">
@@ -161,7 +161,7 @@ const Dashboard = () => {
               <p className="text-xl font-semibold text-gray-700">Ease Abode</p>
             </div>
           </div>
-          <div className="p-2 md:p-4 ml-auto mr-auto mt-4 md:mt-8 w-8/10 flex flex-row space-x-4 md:space-x-0 items-center justify-center md:flex-col md:space-y-6 md:justify-start md:items-start">
+          <div className=" md:p-4 ml-auto mr-auto mt-2 md:mt-8 w-8/10 flex flex-row space-x-4 md:space-x-0 items-center justify-center md:flex-col md:space-y-6 md:justify-start md:items-start">
             <div className="p-1 flex flex-row items-center space-x-4 text-gray-700 hover:text-gray-700 hover:bg-gray-200 rounded-md hover:cursor-pointer">
               <GoHome className="text-2xl font-bold" />
               <p className="text-md font-medium hidden md:block">Home</p>

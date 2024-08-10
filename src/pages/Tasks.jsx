@@ -511,7 +511,7 @@ const Tasks = () => {
                 />
                 <div className="flex flex-row space-x-2 flex-start overflow-auto">
                   {selectedDate && (
-                    <button className="flex flex-row items-center justify-center p-2  h-6 text-semibold text-xs border border-gray-300 hover:bg-gray-50 rounded-md text-gray-500">
+                    <button className="flex flex-row items-center justify-center p-2 h-6 text-semibold text-xs border border-gray-300 hover:bg-gray-50 rounded-md text-gray-500">
                       <CiCalendar className="mr-1 text-lg text-green-500" />
                       <span className="text-green-500">
                         {selectedDate.toString().substring(4, 11)}
