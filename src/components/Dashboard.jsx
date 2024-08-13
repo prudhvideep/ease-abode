@@ -153,7 +153,7 @@ const Dashboard = () => {
       <div className="w-9/10 h-full md:w-10/12 md:h-9/10 grid grid-cols-1 md:grid-rows-8 md:grid-cols-3 gap-2 md:gap-6">
         <div
           name="sideBar"
-          className="bg-white md:row-span-8 min-h-12 rounded-lg overflow-auto"
+          className="p-2 md:p-0 bg-white md:row-span-8 min-h-12 rounded-lg overflow-x-scroll md:overflow-auto"
         >
           <div className="hidden p-4 ml-auto mr-auto mt-8 w-8/10 md:flex flex-row">
             <div className="flex flex-row space-x-2">

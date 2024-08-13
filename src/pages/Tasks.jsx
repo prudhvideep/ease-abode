@@ -18,6 +18,7 @@ import PriorityPicker from "../components/PriorityPicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FiSidebar, FiBell } from "react-icons/fi";
 import { IoCloseSharp } from "react-icons/io5";
+import { MdHistory } from "react-icons/md";
 import { FaPlus, FaChevronLeft, FaFlag, FaCheck } from "react-icons/fa6";
 import {
   CiCircleInfo,
@@ -52,9 +53,10 @@ const Tasks = () => {
   const [priority, setPriority] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
   const [addTask, setAddTask] = useState(false);
+  const [taskDetails, setTaskDetails] = useState([]);
   const [userDetails, setUserDetails] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState([]);
-  const [taskDetails, setTaskDetails] = useState([]);
+  const [taskHistoryDetails, setTaskHistoryDetails] = useState([]);
 
   useEffect(() => {
     onAuthStateChanged(auth, async (user) => {
@@ -62,6 +64,7 @@ const Tasks = () => {
         navigate("/");
       } else {
         setAuthUser(user);
+        setSelectedFilter("All");
 
         const snapShot = await get(child(ref(db), `mapping/${user.uid}`));
         if (snapShot.exists()) {
@@ -152,8 +155,30 @@ const Tasks = () => {
         const tasks = Object.values(snapshot.val()).sort((a, b) => {
           return new Date(a.duedate) - new Date(b.duedate);
         });
-
         setTaskDetails(tasks);
+      }
+    } catch (error) {
+      console.error("Error fetching tasks. ", error);
+    }
+  };
+
+  const fetchTaskHistory = async (roomid) => {
+    try {
+      const tasksRef = ref(db, "taskHistory");
+      const roomQuery = query(
+        tasksRef,
+        orderByChild("roomid"),
+        equalTo(roomid)
+      );
+
+      const snapshot = await get(roomQuery);
+
+      if (snapshot.exists()) {
+        const tasks = Object.values(snapshot.val()).sort((a, b) => {
+          return new Date(a.completionDate) - new Date(b.completionDate);
+        });
+
+        setTaskHistoryDetails(tasks);
       }
     } catch (error) {
       console.error("Error fetching tasks. ", error);
@@ -231,10 +256,22 @@ const Tasks = () => {
   };
 
   const handleCompleteTask = async (taskDetail, index) => {
-    // console.log("Index ----> ",index);
+    // console.log("TaskDetail ----> ",taskDetail);
     const taskId = taskDetail?.taskid;
     try {
       if (taskId) {
+        const historyTaskDetails = {
+          ...taskDetail,
+          completionDate: new Date().toString(),
+          completedBy: {
+            username: authUser?.displayName,
+            email: authUser?.email,
+            uid: authUser?.uid,
+          },
+        };
+
+        await set(ref(db, "taskHistory/" + taskId), historyTaskDetails);
+
         const taskRef = ref(db, `tasks/${taskId}`);
         await remove(taskRef);
       }
@@ -255,21 +292,22 @@ const Tasks = () => {
         orderByChild("roomid"),
         equalTo(roomId)
       );
-
+  
       const snapshot = await get(roomQuery);
-
+  
       if (snapshot.exists()) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+  
         const tasks = Object.values(snapshot.val()).filter((task) => {
-          const curDate = new Date();
           const taskDate = new Date(task.duedate);
-
-          if((curDate.getDay() === taskDate.getDay()) && (curDate.getMonth() === taskDate.getMonth()) && (curDate.getFullYear() === taskDate.getFullYear())){
-            return true;
-          }
-          return false;
+          taskDate.setHours(0, 0, 0, 0); 
+  
+          return taskDate.getTime() === today.getTime();
         }).sort((a,b) => {
           return new Date(a.duedate) - new Date(b.duedate);
-        })
+        });
+  
         setTaskDetails(tasks);
       }
     } catch (error) {
@@ -288,35 +326,36 @@ const Tasks = () => {
       );
 
       const snapshot = await get(roomQuery);
-      if(snapshot.exists()){
-        const tasks = Object.values(snapshot.val()).filter((task) => {
-          const curDate = new Date();
-          const taskDate = new Date(task.duedate);
+      if (snapshot.exists()) {
+        const tasks = Object.values(snapshot.val())
+          .filter((task) => {
+            const curDate = new Date();
+            const taskDate = new Date(task.duedate);
 
-          if(curDate.getFullYear() < taskDate.getFullYear()){
-            return true;
-          }else if(curDate.getFullYear() === taskDate.getFullYear()){
-            if(curDate.getMonth() < taskDate.getMonth()){
+            if (curDate.getFullYear() < taskDate.getFullYear()) {
               return true;
-            }else if(curDate.getMonth() === taskDate.getMonth()){
-              if(curDate.getDate() < taskDate.getDate()){
+            } else if (curDate.getFullYear() === taskDate.getFullYear()) {
+              if (curDate.getMonth() < taskDate.getMonth()) {
                 return true;
+              } else if (curDate.getMonth() === taskDate.getMonth()) {
+                if (curDate.getDate() < taskDate.getDate()) {
+                  return true;
+                }
               }
             }
-          }
 
-          return false;
-        }).sort((a,b) => {
-          return (new Date(a.duedate) - new Date(b.duedate));
-        })
+            return false;
+          })
+          .sort((a, b) => {
+            return new Date(a.duedate) - new Date(b.duedate);
+          });
 
         setTaskDetails(tasks);
       }
-
     } catch (error) {
       console.error("Error fetching tasks. ", error);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen h-screen w-screen overflow-auto">
@@ -367,7 +406,7 @@ const Tasks = () => {
               </div>
               <div
                 onClick={() => {
-                  if(roomId){
+                  if (roomId) {
                     filterCurrentTasks(roomId);
                   }
                 }}
@@ -382,7 +421,7 @@ const Tasks = () => {
               </div>
               <div
                 onClick={() => {
-                  if(roomId){
+                  if (roomId) {
                     fetchUpcomingTasks(roomId);
                   }
                 }}
@@ -394,6 +433,20 @@ const Tasks = () => {
               >
                 <CiCalendar className="text-xl" />
                 <p className="text-sm">Upcoming</p>
+              </div>
+              <div
+                onClick={() => {
+                  setSelectedFilter("History");
+                  fetchTaskHistory(roomId);
+                }}
+                className={`p-2 flex flex-row items-center justify-start space-x-2 rounded-lg ${
+                  selectedFilter === "History"
+                    ? "text-customtextred bg-custombgred"
+                    : "text-gray-500 hover:bg-gray-200 hover:text-gray-700"
+                }  hover:cursor-pointer `}
+              >
+                <MdHistory className="text-xl" />
+                <p className="text-sm">History</p>
               </div>
             </div>
             <div
@@ -423,9 +476,60 @@ const Tasks = () => {
             >
               <FaChevronLeft className="text-xl font-bold hover:text-gray-900" />
             </div>
-            <p className="text-2xl font-semibold">Tasks</p>
+            <p className="text-2xl font-semibold">
+              {selectedFilter === "History" ? "History" : "Tasks"}
+            </p>
           </div>
-          {taskDetails.length > 0 && (
+          {taskHistoryDetails.length > 0 && selectedFilter === "History" && (
+            <div className="p-auto w-7/10 mt-2 ml-auto mr-auto">
+              {taskHistoryDetails.map((taskDetail, index) => (
+                <div
+                  key={index}
+                  className="transition-all delay-200 ease-in-out p-2 flex flex-row items-start justify-center">
+                  <div className="p-2 w-full h-30 max-h-60 border-b overflow-auto">
+                    <input
+                      readOnly={true}
+                      value={taskDetail?.taskname || ""}
+                      placeholder="Task Name"
+                      className="w-full h-8 text-sm outline-none text-gray-700"
+                    />
+                    <input
+                      readOnly={true}
+                      value={taskDetail?.description || ""}
+                      placeholder="Description"
+                      className="w-full h-8 font-normal text-xs text-gray-500 outline-none"
+                    />
+                    <div className="flex flex-row space-x-2 flex-start">
+                      <button className="flex flex-row items-center justify-center p-2  h-6 text-semibold text-xs border border-gray-300 hover:bg-gray-50 rounded-md text-gray-500">
+                        <CiCalendar className="mr-1 text-lg text-orange-500" />
+                        <span className="text-orange-500">
+                          {taskDetail?.completionDate
+                            ?.toString()
+                            ?.substring(4, 11)}
+                        </span>
+                      </button>
+                      <button className="flex flex-row items-center justify-center p-2  h-6 text-semibold text-xs border border-gray-300 hover:bg-gray-50 rounded-md text-gray-500">
+                        <FaFlag
+                          className={`mr-1 text-md ${getPriorityColour(
+                            taskDetail?.priority
+                          )}`}
+                        />
+                        <span>{taskDetail?.priority || ""}</span>
+                      </button>
+                      {
+                          <button
+                            key={index}
+                            className="flex flex-row items-center justify-center p-2 h-6 text-semibold text-xs border border-gray-300 hover:bg-gray-50 rounded-md text-gray-500">
+                            <span>{taskDetail?.completedBy?.username?.split(" ")[0]}</span>
+                          </button>
+                      }
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          {taskDetails.length > 0 && selectedFilter !== "History" && (
             <div className="p-auto w-7/10 mt-2 ml-auto mr-auto">
               {taskDetails.map((taskDetail, index) => (
                 <div
@@ -485,7 +589,7 @@ const Tasks = () => {
             </div>
           )}
           <div className="relative p-auto w-7/10 mt-2 ml-auto mr-auto">
-            {addTask && (
+            {(addTask && (selectedFilter !== "History")) && (
               <div className="p-2 w-full h-42 max-h-60 rounded-lg border border-gray-400">
                 <textarea
                   value={newTask?.name}
@@ -584,8 +688,7 @@ const Tasks = () => {
                     </div>
                   )}
                   {showDatePicker && (
-                    <div ref={datePickerRef} className="absolute left-0 top-0"
-                    >
+                    <div ref={datePickerRef} className="absolute left-0 top-0">
                       <DatePicker
                         selected={selectedDate}
                         onChange={handleDateChange}
@@ -634,7 +737,7 @@ const Tasks = () => {
                 </div>
               </div>
             )}
-            {!addTask && (
+            {(!addTask && (selectedFilter !== "History")) && (
               <div
                 onClick={() => setAddTask(true)}
                 className="p-2 flex flex-row items-center space-x-2 group hover:cursor-pointer"
