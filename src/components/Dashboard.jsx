@@ -15,13 +15,14 @@ import { GoHome } from "react-icons/go";
 import { GiAtomicSlashes } from "react-icons/gi";
 import { MdOutlineLocalGroceryStore } from "react-icons/md";
 import { FaDollarSign, FaCheck } from "react-icons/fa6";
-import { TbCash,TbUser } from "react-icons/tb";
+import { TbCash,TbUser,TbNotes } from "react-icons/tb";
 import {
   CiMoneyBill,
   CiSettings,
   CiCircleInfo,
   CiPower,
   CiBellOn,
+  CiNote,
 } from "react-icons/ci";
 import { GoTasklist } from "react-icons/go";
 import { AiOutlineTeam } from "react-icons/ai";
@@ -179,9 +180,11 @@ const Dashboard = () => {
               <p className="text-md font-medium hidden md:block">Tasks</p>
               {/* <FaCirclePlus className="text-sm absolute right-10 inset-y-1"/> */}
             </div>
-            <div className="p-1 relative flex flex-row items-center space-x-4 text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded-md hover:cursor-pointer">
-              <MdOutlineLocalGroceryStore className="text-2xl font-bold " />
-              <p className="text-md font-medium hidden md:block">Groceries</p>
+            <div
+              onClick={() => navigate("/notes")} 
+              className="p-1 relative flex flex-row items-center space-x-4 text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded-md hover:cursor-pointer">
+              <TbNotes className="text-2xl font-bold " />
+              <p className="text-md font-medium hidden md:block">Notes</p>
               {/* <FaCirclePlus className="text-sm absolute right-10 inset-y-1"/> */}
             </div>
             <div
@@ -262,7 +265,7 @@ const Dashboard = () => {
         </div>
         <div
           name="Tasks"
-          className="bg-white md:row-span-7 md:col-span-1 rounded-lg overflow-clip md:overflow-auto"
+          className="bg-white md:row-span-7 md:col-span-1 rounded-lg overflow-clip md:overflow-auto" 
         >
           <div className="p-4 w-9/10 ml-auto mr-auto flex flex-col space-y-4 h-full">
             <p className="text-xl font-semibold text-gray-700">

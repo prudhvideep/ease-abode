@@ -292,22 +292,24 @@ const Tasks = () => {
         orderByChild("roomid"),
         equalTo(roomId)
       );
-  
+
       const snapshot = await get(roomQuery);
-  
+
       if (snapshot.exists()) {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-  
-        const tasks = Object.values(snapshot.val()).filter((task) => {
-          const taskDate = new Date(task.duedate);
-          taskDate.setHours(0, 0, 0, 0); 
-  
-          return taskDate.getTime() === today.getTime();
-        }).sort((a,b) => {
-          return new Date(a.duedate) - new Date(b.duedate);
-        });
-  
+
+        const tasks = Object.values(snapshot.val())
+          .filter((task) => {
+            const taskDate = new Date(task.duedate);
+            taskDate.setHours(0, 0, 0, 0);
+
+            return taskDate.getTime() === today.getTime();
+          })
+          .sort((a, b) => {
+            return new Date(a.duedate) - new Date(b.duedate);
+          });
+
         setTaskDetails(tasks);
       }
     } catch (error) {
@@ -485,7 +487,8 @@ const Tasks = () => {
               {taskHistoryDetails.map((taskDetail, index) => (
                 <div
                   key={index}
-                  className="transition-all delay-200 ease-in-out p-2 flex flex-row items-start justify-center">
+                  className="transition-all delay-200 ease-in-out p-2 flex flex-row items-start justify-center"
+                >
                   <div className="p-2 w-full h-30 max-h-60 border-b overflow-auto">
                     <input
                       readOnly={true}
@@ -517,11 +520,14 @@ const Tasks = () => {
                         <span>{taskDetail?.priority || ""}</span>
                       </button>
                       {
-                          <button
-                            key={index}
-                            className="flex flex-row items-center justify-center p-2 h-6 text-semibold text-xs border border-gray-300 hover:bg-gray-50 rounded-md text-gray-500">
-                            <span>{taskDetail?.completedBy?.username?.split(" ")[0]}</span>
-                          </button>
+                        <button
+                          key={index}
+                          className="flex flex-row items-center justify-center p-2 h-6 text-semibold text-xs border border-gray-300 hover:bg-gray-50 rounded-md text-gray-500"
+                        >
+                          <span>
+                            {taskDetail?.completedBy?.username?.split(" ")[0]}
+                          </span>
+                        </button>
                       }
                     </div>
                   </div>
@@ -589,7 +595,7 @@ const Tasks = () => {
             </div>
           )}
           <div className="relative p-auto w-7/10 mt-2 ml-auto mr-auto">
-            {(addTask && (selectedFilter !== "History")) && (
+            {addTask && selectedFilter !== "History" && (
               <div className="p-2 w-full h-42 max-h-60 rounded-lg border border-gray-400">
                 <textarea
                   value={newTask?.name}
@@ -737,7 +743,7 @@ const Tasks = () => {
                 </div>
               </div>
             )}
-            {(!addTask && (selectedFilter !== "History")) && (
+            {!addTask && selectedFilter !== "History" && (
               <div
                 onClick={() => setAddTask(true)}
                 className="p-2 flex flex-row items-center space-x-2 group hover:cursor-pointer"

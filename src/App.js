@@ -6,6 +6,7 @@ import SignUp from "./pages/Auth/SignUp";
 import { BrowserRouter as Router } from "react-router-dom";
 import { Route, Routes } from "react-router-dom";
 import Tasks from "./pages/Tasks";
+import Notes from "./pages/Notes";
 
 function App() {
   
@@ -17,6 +18,7 @@ function App() {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/tasks" element={<Tasks />} />
         <Route path="/roomates" element={<Roomates />} />
+        <Route path="/notes" element={<Notes />} />
         <Route path="/passwordreset" element={<PasswordReset />} />
       </Routes>
     </Router>
