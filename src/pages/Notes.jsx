@@ -15,7 +15,7 @@ import {
 } from "firebase/database";
 import "react-datepicker/dist/react-datepicker.css";
 import { FiSidebar, FiBell } from "react-icons/fi";
-import { FaChevronLeft, FaRegImage } from "react-icons/fa6";
+import { FaChevronLeft, FaRegImage, FaRegLightbulb } from "react-icons/fa6";
 import { IoColorPaletteOutline } from "react-icons/io5";
 import {
   CiCircleInfo,
@@ -23,12 +23,12 @@ import {
   CiTrash,
   CiSquareCheck,
   CiImageOn,
-  CiShare2,
 } from "react-icons/ci";
 import { MdOutlineMailOutline } from "react-icons/md";
 import { GoArchive } from "react-icons/go";
 import { BiSolidPaint } from "react-icons/bi";
 import useAutoSizeTextArea from "../hooks/TextAreaHook";
+import Archive from "./Archive";
 
 const Notes = () => {
   const navigate = useNavigate();
@@ -44,8 +44,8 @@ const Notes = () => {
 
   const [roomId, setRoomId] = useState(null);
   const [newList, setNewList] = useState(false);
-  const [showPopup,setShowPopup] = useState(false);
-  const [popupData,setPopupData] = useState();
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupData, setPopupData] = useState();
   const [newListType, setNewListType] = useState();
   const [noteDetails, setNoteDetails] = useState([]);
   const [newNormalListData, setNewNormalListData] = useState(null);
@@ -57,10 +57,10 @@ const Notes = () => {
         navigate("/");
       } else {
         setAuthUser(user);
-
         const snapShot = await get(child(ref(db), `mapping/${user.uid}`));
         if (snapShot.exists()) {
           setRoomId(snapShot.val());
+          setSelectedFilter("Notes")
           fetchNoteDetails(snapShot.val());
         }
       }
@@ -80,39 +80,43 @@ const Notes = () => {
   }, [newList, newNormalListData, newNormalListTitle]);
 
   useEffect(() => {
-    if(popupRef){
+    if (popupRef.current) {
       document.addEventListener("mousedown", handlePopupOutsideClick);
-    }else{
+    } else {
       document.removeEventListener("mousedown", handlePopupOutsideClick);
     }
 
     return () => {
       document.removeEventListener("mousedown", handlePopupOutsideClick);
+    };
+  }, [showPopup, popupRef, popupData]);
+
+  useAutoSizeTextArea(newNoteTextAreaRef, newNormalListData);
+  
+  useEffect(() => {
+    if(popupDataRef.current){
+      popupDataRef.current.style.height = "0px";
+
+      const scrollHeight = popupDataRef.current.scrollHeight;
+
+      popupDataRef.current.style.height = scrollHeight + "px";
     }
-  },[showPopup,popupRef,popupData]);
+  }, [popupDataRef,showPopup,popupData]);
 
   useEffect(() => {
-    if (showPopup && popupData) {
-      const timer = setTimeout(() => {
-        setPopupData({...popupData});
-      }, 0);
-      return () => clearTimeout(timer);
+    if(popupTitleRef.current){
+      popupTitleRef.current.style.height = "0px";
+
+      const scrollHeight = popupTitleRef.current.scrollHeight;
+
+      popupTitleRef.current.style.height = scrollHeight + "px";
     }
-  }, [showPopup, popupData])
-
-  useAutoSizeTextArea(
-    newNoteTextAreaRef,
-    newNormalListData
-  );
-
-  useAutoSizeTextArea(popupDataRef,popupData);
-
-  useAutoSizeTextArea(popupTitleRef,popupData);
+  }, [popupDataRef,showPopup,popupData]);
 
   const handleShowPopup = (noteDetail) => {
     setPopupData(noteDetail);
     setShowPopup(true);
-  }
+  };
 
   const handleSideBarMinimize = () => {
     setMinimize(!minimize);
@@ -128,18 +132,19 @@ const Notes = () => {
   };
 
   const handlePopupOutsideClick = async (event) => {
-    if(popupRef.current && !popupRef.current.contains(event.target)){
+    if (popupRef.current && !popupRef.current.contains(event.target)) {
       let filterNotes = noteDetails.filter((note) => {
-        if(note.noteId !== popupData.noteId){
+        if (note.noteId !== popupData.noteId) {
           return true;
         }
-      })
+        return false;
+      });
       filterNotes = [popupData].concat(filterNotes);
       await set(ref(db, "notes/" + popupData.noteId), popupData);
       setNoteDetails(filterNotes);
       setShowPopup(false);
     }
-  }
+  };
 
   const fetchNoteDetails = async (roomId) => {
     try {
@@ -163,9 +168,9 @@ const Notes = () => {
   };
 
   const createNewNormalNote = async () => {
-    console.log("newNormalListData", newNormalListData);
+    // console.log("newNormalListData", newNormalListData);
     if (newNormalListTitle || newNormalListData) {
-      console.log("Inside create new note");
+      // console.log("Inside create new note");
       const newNoteId = push(ref(db, "notes")).key;
       const newNoteDetails = {
         noteId: newNoteId,
@@ -176,20 +181,21 @@ const Notes = () => {
       };
 
       await set(ref(db, "notes/" + newNoteId), newNoteDetails);
-      setNoteDetails((prev) => [newNoteDetails,...prev]);
+      setNoteDetails((prev) => [newNoteDetails, ...prev]);
     }
   };
 
   const handleDeleteNote = async () => {
-    if(popupData){
+    if (popupData) {
       const popupDataVar = popupData;
 
       const filteredNotes = noteDetails.filter((note) => {
-        if(note.noteId !== popupData.noteId){
+        if (note.noteId !== popupData.noteId) {
           return true;
         }
-      })
-      
+        return false;
+      });
+
       setNoteDetails(filteredNotes);
       setShowPopup(false);
       setPopupData(null);
@@ -197,17 +203,18 @@ const Notes = () => {
       const taskRef = ref(db, `notes/${popupDataVar.noteId}`);
       await remove(taskRef);
     }
-  }
+  };
 
   const handleArchiveNote = async () => {
-    if(popupData){
+    if (popupData) {
       const popupDataVar = popupData;
 
       const filteredNotes = noteDetails.filter((note) => {
-        if(note.noteId !== popupData.noteId){
+        if (note.noteId !== popupData.noteId) {
           return true;
         }
-      })
+        return false;
+      });
 
       await set(ref(db, "notesArchive/" + popupData.noteId), popupData);
 
@@ -220,7 +227,7 @@ const Notes = () => {
 
       setPopupData(null);
     }
-  }
+  };
 
   const handleLogOut = async () => {
     try {
@@ -257,11 +264,28 @@ const Notes = () => {
               </div>
             </div>
             <div
-              className={`mt-4 p-2 flex flex-grow flex-col space-y-1 ${
+              className={`mt-4 p-2 flex flex-grow flex-col space-y-2 ${
                 minimize ? "hidden" : " "
               }`}
             >
               <div
+                onClick={() => {
+                  setSelectedFilter("Notes")
+                  navigate("/notes")
+                }}
+                className={`p-2 flex flex-row items-center justify-start space-x-2 rounded-lg ${
+                  selectedFilter === "Notes"
+                    ? "text-customtextred bg-custombgred"
+                    : "text-gray-500 hover:bg-gray-200 hover:text-gray-700"
+                }  hover:cursor-pointer `}
+              >
+                <FaRegLightbulb className="text-xl" />
+                <p className="text-sm">Notes</p>
+              </div>
+              <div
+                onClick={() => {
+                  setSelectedFilter("Archive");
+                }}
                 className={`p-2 flex flex-row items-center justify-start space-x-2 rounded-lg ${
                   selectedFilter === "Archive"
                     ? "text-customtextred bg-custombgred"
@@ -270,16 +294,6 @@ const Notes = () => {
               >
                 <GoArchive className="text-xl" />
                 <p className="text-sm">Archive</p>
-              </div>
-              <div
-                className={`p-2 flex flex-row items-center justify-start space-x-2 rounded-lg ${
-                  selectedFilter === "Today"
-                    ? "text-customtextred bg-custombgred"
-                    : "text-gray-500 hover:bg-gray-200 hover:text-gray-700"
-                }  hover:cursor-pointer `}
-              >
-                <CiTrash className="text-xl" />
-                <p className="text-sm">Trash</p>
               </div>
             </div>
             <div
@@ -301,67 +315,83 @@ const Notes = () => {
             </div>
           </div>
         </div>
-        <div className={`w-full h-full bg-white overflow-auto`}>
+        {selectedFilter === "Archive" && <Archive />}
+        {selectedFilter === "Notes" && <div className={`w-full h-full bg-white overflow-auto`}>
           <div className="relative flex flex-row items-center space-x-4 w-7/10 h-10 mt-8 ml-auto mr-auto">
-            {showPopup && <div
-             ref={popupRef}
-             className="absolute z-10 hover:z-20 top-40 w-full p-auto mt-4 ml-auto mr-auto transition-all ease-in-out delay-300">
-              <div className="p-2 w-full bg-white rounded-lg border border-gray-400">
-                <textarea
-                  ref={popupTitleRef}
-                  value={popupData?.noteTitle}
-                  placeholder="Title"
-                  rows ={1}
-                  onChange={(event) => {
-                    setPopupData((prevData) => ({
-                      ...prevData,
-                      noteTitle : event.target.value
-                    }))
-                  }}
-                  className="ml-1 w-full h-8 resize-none font-semibold text-lg outline-none placeholder-gray-500 placeholder:font-semibold placeholder-opacity-75 placeholder-inset-0"
-                />
-                <textarea
-                  ref={popupDataRef}
-                  value={popupData?.noteData}
-                  placeholder="Take a Note..."
-                  rows={1}
-                  onChange={(event) => {
-                    setPopupData((prevData) => ({
-                      ...prevData,
-                      noteData : event.target.value
-                    }))
-                  }}
-                  className="ml-1 w-full h-8 resize-none font-normal text-md text-gray-500 outline-none placeholder:font-medium placeholder-gray-500 placeholder-opacity-60 placeholder-inset-0"
-                />
-                <div className="flex flex-row justify-between items-center">
-                  <div className="flex flex-row space-x-8 items-center">
-                    <IoColorPaletteOutline className="ml-1 font-thin text-xl hover:cursor-pointer hover:scale-110" />
-                    <MdOutlineMailOutline className="ml-1 font-thin text-xl hover:cursor-pointer hover:scale-110" />
-                    <GoArchive 
-                      onClick={handleArchiveNote}
-                      className="ml-1 font-thin text-xl hover:cursor-pointer hover:scale-110" />
-                    <CiTrash
-                      onClick={handleDeleteNote}
-                      className="ml-1 font-thin text-lg hover:cursor-pointer hover:scale-110" />
+            {showPopup && (
+              <div
+                ref={popupRef}
+                className=" absolute z-10 hover:z-20 top-32 w-full mt-4 ml-auto mr-auto transition-all ease-in-out delay-300 bg-white rounded-lg border border-gray-400 p-4 shadow-lg overflow-y-auto"
+              >
+                <div className="p-2 w-full bg-white rounded-lg">
+                  <textarea
+                    ref={popupTitleRef}
+                    value={popupData?.noteTitle}
+                    placeholder="Title"
+                    rows={1}
+                    onChange={(event) => {
+                      setPopupData((prevData) => ({
+                        ...prevData,
+                        noteTitle: event.target.value,
+                      }));
+                    }}
+                    className="ml-1 w-full h-8 resize-none font-semibold text-lg outline-none placeholder-gray-500 placeholder:font-semibold placeholder-opacity-75 placeholder-inset-0"
+                  />
+                  <textarea
+                    ref={popupDataRef}
+                    value={popupData?.noteData}
+                    placeholder="Take a Note..."
+                    rows={1}
+                    onChange={(event) => {
+                      setPopupData((prevData) => ({
+                        ...prevData,
+                        noteData: event.target.value,
+                      }));
+                    }}
+                    className="ml-1 w-full h-8 resize-none font-normal text-md text-gray-500 outline-none placeholder:font-medium placeholder-gray-500 placeholder-opacity-60 placeholder-inset-0"
+                  />
+                  <div className="flex flex-row justify-between items-center">
+                    <div className="flex flex-row space-x-8 items-center">
+                      <IoColorPaletteOutline className="ml-1 font-thin text-xl hover:cursor-pointer hover:scale-110" />
+                      <MdOutlineMailOutline className="ml-1 font-thin text-xl hover:cursor-pointer hover:scale-110" />
+                      <GoArchive
+                        onClick={handleArchiveNote}
+                        className="ml-1 font-thin text-xl hover:cursor-pointer hover:scale-110"
+                      />
+                      <CiTrash
+                        onClick={handleDeleteNote}
+                        className="ml-1 font-thin text-lg hover:cursor-pointer hover:scale-110"
+                      />
+                    </div>
+                    <button
+                      onClick={() => setShowPopup(false)}
+                      className="p-2 font-medium rounded-lg hover:bg-gray-100"
+                    >
+                      Close
+                    </button>
                   </div>
-                  <button
-                    onClick={() => setShowPopup(false)}
-                    className="p-2 font-medium rounded-lg hover:bg-gray-100"
-                  >
-                    Close
-                  </button>
                 </div>
               </div>
-            </div>}
+            )}
             <div
               onClick={() => navigate("/")}
-              className={`p-2 rounded-md hover:bg-gray-200 transform transition-transform duration-300 ease-in-out hover:scale-90 ${showPopup ? "blur-sm" : ""}`}
+              className={`p-2 rounded-md hover:bg-gray-200 transform transition-transform duration-300 ease-in-out hover:scale-90 ${
+                showPopup ? "blur-lg" : ""
+              }`}
             >
               <FaChevronLeft className="text-xl font-bold hover:text-gray-900" />
             </div>
-            <p className={`text-2xl font-semibold ${showPopup ? "blur-sm" : ""}`}>Notes</p>
+            <p
+              className={`text-2xl font-semibold ${showPopup ? "blur-lg" : ""}`}
+            >
+              Notes
+            </p>
           </div>
-          <div className={`relative p-auto w-6.5/10 mt-4 ml-auto mr-auto ${showPopup ? "blur-sm" : ""}`}>
+          <div
+            className={`relative p-auto w-6.5/10 mt-4 ml-auto mr-auto ${
+              showPopup ? "blur-lg" : ""
+            }`}
+          >
             {!newList && (
               <div className="p-2 w-full h-42 rounded-lg border border-gray-400">
                 <div className="flex flex-row items-center justify-around">
@@ -418,7 +448,11 @@ const Notes = () => {
               </div>
             )}
           </div>
-          <div className={`w-7/10 mt-8 ml-auto mr-auto ${showPopup ? "blur-sm" : ""}`}>
+          <div
+            className={`w-7/10 mt-8 ml-auto mr-auto ${
+              showPopup ? "blur-lg" : ""
+            }`}
+          >
             <p className="ml-2 text-2xl font-semibold">Recent Notes</p>
             <div className="mt-2 max-h-1/3 grid grid-cols-1 grid-flow-row md:grid-cols-2 lg:grid-flow-row lg:grid-cols-3 gap-2">
               {noteDetails.map((noteDetail, index) => (
@@ -428,7 +462,8 @@ const Notes = () => {
                 >
                   <div
                     onClick={() => handleShowPopup(noteDetail)}
-                    className="p-2 w-full h-30 max-h-60 border border-gray-500 rounded-lg overflow-auto hover:cursor-pointer hover:border-gray-700 hover:shadow-inner">
+                    className="p-2 w-full h-30 max-h-60 border border-gray-500 rounded-lg overflow-auto hover:cursor-pointer hover:border-gray-700 hover:shadow-inner"
+                  >
                     <input
                       readOnly={true}
                       value={noteDetail?.noteTitle || ""}
@@ -446,7 +481,7 @@ const Notes = () => {
               ))}
             </div>
           </div>
-        </div>
+        </div>}
       </div>
     </div>
   );

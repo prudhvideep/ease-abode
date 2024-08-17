@@ -15,7 +15,7 @@ import { GoHome } from "react-icons/go";
 import { GiAtomicSlashes } from "react-icons/gi";
 import { MdOutlineLocalGroceryStore } from "react-icons/md";
 import { FaDollarSign, FaCheck } from "react-icons/fa6";
-import { TbCash,TbUser,TbNotes } from "react-icons/tb";
+import { TbCash, TbUser, TbNotes } from "react-icons/tb";
 import {
   CiMoneyBill,
   CiSettings,
@@ -76,7 +76,7 @@ const Dashboard = () => {
         const snapShot = await get(child(ref(db), `mapping/${user.uid}`));
         if (snapShot.exists()) {
           fetchTasks(snapShot.val());
-          fetchUserDetails(snapShot.val())
+          fetchUserDetails(snapShot.val());
         }
       }
     });
@@ -94,7 +94,7 @@ const Dashboard = () => {
   const fetchUserDetails = async (roomId) => {
     const roomSnap = await get(child(ref(db), `/rooms/${roomId}`));
 
-    if(roomSnap.exists()){
+    if (roomSnap.exists()) {
       const users = roomSnap.val().roomates;
       users.forEach(async (userId) => {
         const userSnap = await get(child(ref(db), `/users/${userId}`));
@@ -107,9 +107,8 @@ const Dashboard = () => {
           });
         }
       });
-  
     }
-  }
+  };
 
   const fetchTasks = async (roomid) => {
     try {
@@ -123,9 +122,11 @@ const Dashboard = () => {
       const snapshot = await get(roomQuery);
 
       if (snapshot.exists()) {
-        const tasks = Object.values(snapshot.val()).sort((a, b) => {
-          return new Date(a.duedate) - new Date(b.duedate);
-        }).slice(0,4);
+        const tasks = Object.values(snapshot.val())
+          .sort((a, b) => {
+            return new Date(a.duedate) - new Date(b.duedate);
+          })
+          .slice(0, 4);
 
         setTasks(tasks);
       }
@@ -167,11 +168,6 @@ const Dashboard = () => {
               <GoHome className="text-2xl font-bold" />
               <p className="text-md font-medium hidden md:block">Home</p>
             </div>
-            <div className="p-1 relative flex flex-row items-center space-x-4 text-gray-400 hover:text-gray-700 rounded-md hover:bg-gray-200 hover:cursor-pointer">
-              <CiMoneyBill className="text-2xl font-bold " />
-              <p className="text-md font-medium hidden md:block">Expenses</p>
-              {/* <FaCirclePlus className="text-sm absolute right-10 inset-y-1"/> */}
-            </div>
             <div
               onClick={() => navigate("/tasks")}
               className="p-1 relative flex flex-row items-center space-x-4 text-gray-400 hover:text-gray-700  hover:bg-gray-200 rounded-md hover:cursor-pointer"
@@ -181,10 +177,18 @@ const Dashboard = () => {
               {/* <FaCirclePlus className="text-sm absolute right-10 inset-y-1"/> */}
             </div>
             <div
-              onClick={() => navigate("/notes")} 
-              className="p-1 relative flex flex-row items-center space-x-4 text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded-md hover:cursor-pointer">
+              onClick={() => navigate("/notes")}
+              className="p-1 relative flex flex-row items-center space-x-4 text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded-md hover:cursor-pointer"
+            >
               <TbNotes className="text-2xl font-bold " />
               <p className="text-md font-medium hidden md:block">Notes</p>
+              {/* <FaCirclePlus className="text-sm absolute right-10 inset-y-1"/> */}
+            </div>
+            <div
+              onClick={() => navigate("/expenses")} 
+              className="p-1 relative flex flex-row items-center space-x-4 text-gray-400 hover:text-gray-700 rounded-md hover:bg-gray-200 hover:cursor-pointer">
+              <CiMoneyBill className="text-2xl font-bold " />
+              <p className="text-md font-medium hidden md:block">Expenses</p>
               {/* <FaCirclePlus className="text-sm absolute right-10 inset-y-1"/> */}
             </div>
             <div
@@ -209,7 +213,9 @@ const Dashboard = () => {
           <div className="md:p-4 ml-auto mr-auto mt-16 w-8/10 hidden md:flex flex-row md:flex-col space-y-6">
             <div className="p-1 relative flex flex-row items-center space-x-4 text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded-md hover:cursor-pointer">
               <CiCircleInfo className="text-2xl font-bold " />
-              <p className="text-md font-medium hidden md:block">Help & Information</p>
+              <p className="text-md font-medium hidden md:block">
+                Help & Information
+              </p>
             </div>
             <div
               onClick={handleSignOut}
@@ -265,7 +271,7 @@ const Dashboard = () => {
         </div>
         <div
           name="Tasks"
-          className="bg-white md:row-span-7 md:col-span-1 rounded-lg overflow-clip md:overflow-auto" 
+          className="bg-white md:row-span-7 md:col-span-1 rounded-lg overflow-clip md:overflow-auto"
         >
           <div className="p-4 w-9/10 ml-auto mr-auto flex flex-col space-y-4 h-full">
             <p className="text-xl font-semibold text-gray-700">
@@ -304,13 +310,14 @@ const Dashboard = () => {
           <div className="w-full h-full rounded-lg overflow-auto">
             <div className="p-4 w-9/10 ml-auto mr-auto flex flex-col space-y-4 h-full">
               <p className="text-xl font-semibold text-gray-700">Roomates</p>
-              {userDetails.map((user,index) => (
-                <div key={index} className="flex flex-row justify-between text-gray-500">
+              {userDetails.map((user, index) => (
+                <div
+                  key={index}
+                  className="flex flex-row justify-between text-gray-500"
+                >
                   <div className="flex flex-row items-center justify-center space-x-2">
                     <TbUser className="text-lg font-bold" />
-                    <p className="font-semibold text-sm">
-                      {user.username}
-                    </p>
+                    <p className="font-semibold text-sm">{user.username}</p>
                   </div>
                 </div>
               ))}
@@ -343,8 +350,11 @@ const Dashboard = () => {
               <p className="text-md font-bold text-gray-500">
                 Latest Transactions
               </p>
-              {expenses.map((expense,index) => (
-                <div key={index} className="flex flex-row justify-between text-gray-500">
+              {expenses.map((expense, index) => (
+                <div
+                  key={index}
+                  className="flex flex-row justify-between text-gray-500"
+                >
                   <div className="flex flex-row items-center justify-center space-x-2">
                     <TbCash className="text-lg font-bold" />
                     <p className="font-semibold text-sm">
